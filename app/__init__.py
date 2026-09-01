@@ -44,3 +44,5 @@ def create_app(config_name=None):
     app.register_blueprint(downloads_bp, url_prefix="/downloads")
 
     return app
+
+app = create_app(os.getenv("FLASK_ENV", "prod"))
