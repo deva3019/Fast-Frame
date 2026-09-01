@@ -1,0 +1,112 @@
+{% extends "admin/layout.html" %}
+
+{% block header_title %}Gallery Integration{% endblock %}
+
+{% block content %}
+<div class="max-w-[90rem] mx-auto relative min-h-[80vh]">
+    
+    <!-- Controls Header -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 mb-10">
+        <div>
+            <h3 class="font-display font-bold text-3xl mb-1">Active Mounts</h3>
+            <p class="font-sans text-[10px] text-mono-500 uppercase tracking-widest">Manage and simulate client directories.</p>
+        </div>
+        
+        <button onclick="FF_Admin.Galleries.toggleMountModal()" class="flex items-center gap-3 bg-mono-black text-mono-white dark:bg-mono-white dark:text-mono-black px-6 py-4 rounded-full font-bold text-[10px] tracking-widest uppercase hover:scale-[0.98] transition-transform shadow-xl group z-20">
+            <svg class="w-4 h-4 group-hover:rotate-90 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+            Mount New Drive
+        </button>
+    </div>
+
+    <!-- Search & Filter Controls -->
+    <div class="flex flex-col sm:flex-row gap-4 mb-8">
+        <div class="relative flex-1 group">
+            <svg class="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-mono-400 dark:text-mono-500 transition-colors group-focus-within:text-mono-black dark:group-focus-within:text-mono-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            <input type="text" id="search-galleries" placeholder="Search by client, event name, or folder ID..." class="w-full pl-12 pr-4 py-4 rounded-2xl glass-panel font-sans text-sm focus:outline-none focus:border-mono-500 transition-colors placeholder:text-mono-400 dark:placeholder:text-mono-600">
+        </div>
+    </div>
+
+    <!-- Data Grid -->
+    <div class="relative w-full">
+        <!-- Skeleton Loaders -->
+        <div id="galleries-skeleton" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
+            <div class="h-56 w-full glass-panel rounded-3xl bg-mono-200/20 dark:bg-mono-800/20 animate-pulse"></div>
+            <div class="h-56 w-full glass-panel rounded-3xl bg-mono-200/20 dark:bg-mono-800/20 animate-pulse delay-75"></div>
+            <div class="h-56 w-full glass-panel rounded-3xl bg-mono-200/20 dark:bg-mono-800/20 animate-pulse delay-150"></div>
+        </div>
+
+        <!-- Dynamic Data Injection -->
+        <div id="galleries-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 hidden pb-24"></div>
+    </div>
+
+    <!-- MOUNT DRIVE MODAL -->
+    <div id="mount-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-mono-white/50 dark:bg-mono-black/50 backdrop-blur-md" onclick="FF_Admin.Galleries.toggleMountModal()"></div>
+        
+        <div class="glass-panel rounded-3xl w-full max-w-md p-8 md:p-12 relative z-10 shadow-2xl transform scale-95 opacity-0 transition-all duration-300" id="mount-modal-content">
+            <button onclick="FF_Admin.Galleries.toggleMountModal()" class="absolute top-6 right-6 text-mono-500 hover:text-mono-black dark:hover:text-mono-white transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            
+            <h3 class="font-display font-bold text-2xl mb-2">Initialize Mount</h3>
+            <p class="font-sans text-[9px] text-mono-500 uppercase tracking-widest mb-8">Link a Google Drive folder to a client vault.</p>
+
+            <form id="add-gallery-form" class="space-y-6">
+                <div class="relative group">
+                    <label class="text-[9px] font-bold tracking-widest-xl uppercase text-mono-500 mb-2 block transition-colors group-focus-within:text-mono-black dark:group-focus-within:text-mono-white">Assign To Vault</label>
+                    <select id="gallery-client-id" required class="w-full bg-transparent font-sans text-sm py-3 border-b border-mono-300 dark:border-mono-700 focus:border-mono-black dark:focus:border-mono-white outline-none transition-colors appearance-none cursor-pointer">
+                        <option value="" disabled selected>Select Client ID</option>
+                    </select>
+                </div>
+                
+                <div class="relative group">
+                    <label class="text-[9px] font-bold tracking-widest-xl uppercase text-mono-500 mb-2 block transition-colors group-focus-within:text-mono-black dark:group-focus-within:text-mono-white">Event Classification</label>
+                    <input type="text" id="event-name" required placeholder="E.G. RECEPTION" class="w-full bg-transparent font-sans text-base py-3 border-b border-mono-300 dark:border-mono-700 focus:border-mono-black dark:focus:border-mono-white outline-none transition-colors uppercase tracking-widest placeholder:text-mono-300 dark:placeholder:text-mono-700">
+                </div>
+
+                <div class="relative group">
+                    <label class="text-[9px] font-bold tracking-widest-xl uppercase text-mono-500 mb-2 block transition-colors group-focus-within:text-mono-black dark:group-focus-within:text-mono-white">Drive URL / Folder ID</label>
+                    <input type="text" id="drive-url" required placeholder="PASTE LINK HERE" class="w-full bg-transparent font-mono text-xs py-3 border-b border-mono-300 dark:border-mono-700 focus:border-mono-black dark:focus:border-mono-white outline-none transition-colors placeholder:text-mono-300 dark:placeholder:text-mono-700">
+                </div>
+
+                <button type="submit" class="w-full bg-mono-black text-mono-white dark:bg-mono-white dark:text-mono-black py-4 rounded-full text-[10px] font-bold tracking-widest uppercase hover:scale-[0.98] transition-transform shadow-lg mt-4">
+                    Mount Directory
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- CLIENT SIMULATION PREVIEW MODAL -->
+    <div id="preview-modal" class="fixed inset-0 z-[150] hidden flex flex-col p-4 md:p-8">
+        <div class="absolute inset-0 bg-mono-white/90 dark:bg-mono-black/90 backdrop-blur-xl" onclick="FF_Admin.Galleries.closePreview()"></div>
+        
+        <div class="relative z-10 flex justify-between items-center mb-6 w-full max-w-[1400px] mx-auto">
+            <div>
+                <h3 class="font-display font-bold text-2xl text-mono-black dark:text-mono-white">Client Environment Simulation</h3>
+                <p class="font-sans text-[10px] text-mono-500 uppercase tracking-widest">Live Interactive Preview</p>
+            </div>
+            <div class="flex gap-4 items-center">
+                <a id="preview-external-link" href="#" target="_blank" class="text-[9px] font-bold tracking-widest uppercase text-mono-500 hover:text-mono-black dark:hover:text-mono-white transition-colors flex items-center gap-2">
+                    Open in New Tab <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                </a>
+                <button onclick="FF_Admin.Galleries.closePreview()" class="text-mono-500 hover:text-mono-black dark:hover:text-mono-white transition-colors bg-mono-200/50 dark:bg-mono-800/50 rounded-full p-2">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Iframe Injection Container -->
+        <div class="relative z-10 flex-1 w-full max-w-[1400px] mx-auto rounded-3xl overflow-hidden glass-panel border border-mono-300 dark:border-mono-700 shadow-2xl">
+            <div class="absolute top-0 inset-x-0 h-8 bg-mono-200/50 dark:bg-mono-800/50 flex items-center px-4 gap-2 border-b border-mono-300 dark:border-mono-700">
+                <div class="w-3 h-3 rounded-full bg-red-500/80"></div>
+                <div class="w-3 h-3 rounded-full bg-yellow-500/80"></div>
+                <div class="w-3 h-3 rounded-full bg-green-500/80"></div>
+                <span class="ml-4 text-[9px] font-mono tracking-widest text-mono-500" id="preview-url-bar">fastframe.io/gallery/...</span>
+            </div>
+            <div id="preview-container" class="w-full h-full pt-8 bg-mono-white dark:bg-mono-black">
+                <!-- Iframe loads here -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

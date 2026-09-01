@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ client.client_name }} | FastFrame Archives</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/logo1.png') }}">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Syne', 'sans-serif'],
+                    },
+                    colors: {
+                        mono: {
+                            100: '#f4f4f5', 300: '#d4d4d8', 500: '#71717a',
+                            700: '#27272a', 900: '#18181b', black: '#09090b', white: '#ffffff'
+                        }
+                    },
+                    letterSpacing: { 'widest-xl': '0.3em' }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Premium Aesthetic Elements */
+        .film-grain {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none; z-index: 9999; opacity: 0.04;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+        .dark .film-grain { opacity: 0.06; }
+        
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #27272a; }
+        .dark ::-webkit-scrollbar-thumb { background: #d4d4d8; }
+        
+        .hide-scroll::-webkit-scrollbar { display: none; }
+        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .masonry-grid { column-count: 1; column-gap: 1.5rem; }
+        @media (min-width: 640px) { .masonry-grid { column-count: 2; } }
+        @media (min-width: 1024px) { .masonry-grid { column-count: 3; } }
+        @media (min-width: 1280px) { .masonry-grid { column-count: 4; } }
+        
+        .masonry-item { break-inside: avoid; margin-bottom: 1.5rem; opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
+        .masonry-item.loaded { opacity: 1; transform: translateY(0); }
+
+        .zoom-active { transform: scale(1.5) !important; cursor: zoom-out !important; }
+
+        /* Toast Animation */
+        @keyframes slideUpFade { from { opacity: 0; transform: translate(-50%, 20px); } to { opacity: 1; transform: translate(-50%, 0); } }
+        .toast-enter { animation: slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    </style>
+</head>
+<body class="bg-mono-white text-mono-black dark:bg-mono-black dark:text-mono-white font-sans min-h-screen transition-colors duration-500 pb-24 selection:bg-mono-black selection:text-mono-white dark:selection:bg-mono-white dark:selection:text-mono-black">
+
+    <div class="film-grain"></div>
+
+    <!-- CUSTOM TOAST CONTAINER -->
+    <div id="toast-container" class="fixed bottom-8 left-1/2 -translate-x-1/2 z-[200] flex flex-col gap-3 pointer-events-none"></div>
+
+    <!-- TOP NAVIGATION -->
+    <nav class="fixed top-0 w-full z-40 bg-mono-white/80 dark:bg-mono-black/80 backdrop-blur-xl border-b border-mono-200 dark:border-mono-800 transition-colors duration-500">
+        <div class="max-w-[100rem] mx-auto px-4 md:px-8 h-20 flex items-center justify-between">
+            
+            <!-- Left: Client Info & Back -->
+            <div class="flex items-center gap-6">
+                <a href="/" class="group flex items-center justify-center w-10 h-10 rounded-full border border-mono-300 dark:border-mono-700 hover:bg-mono-black hover:text-mono-white dark:hover:bg-mono-white dark:hover:text-mono-black transition-all">
+                    <svg class="w-4 h-4 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                </a>
+                <div class="hidden sm:block border-l border-mono-300 dark:border-mono-700 pl-6">
+                    <h1 class="font-display font-bold text-xl tracking-tight leading-none">{{ client.client_name }}</h1>
+                    <p class="text-[9px] font-mono tracking-widest-xl uppercase text-mono-500 mt-1">ID: {{ client.special_id }}</p>
+                </div>
+            </div>
+            
+            <!-- Center: Save Status -->
+            <div class="absolute left-1/2 -translate-x-1/2 flex items-center gap-2 opacity-0 transition-opacity duration-300" id="global-save-status">
+                <div class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
+                <span class="text-[9px] font-mono tracking-widest uppercase text-mono-500" id="global-save-text">Syncing...</span>
+            </div>
+            
+            <!-- Right: Controls -->
+            <div class="flex items-center gap-4">
+                <button onclick="FF_App.Review.open()" id="nav-review-btn" class="group relative overflow-hidden bg-mono-black dark:bg-mono-white text-mono-white dark:text-mono-black px-6 py-3 flex items-center gap-3 transition-transform hover:scale-95">
+                    <span class="relative z-10 text-[10px] font-bold tracking-widest-xl uppercase">Review</span>
+                    <span id="nav-total-count" class="relative z-10 text-[10px] font-mono bg-mono-800 dark:bg-mono-200 px-2 py-0.5 rounded-sm transition-colors">0</span>
+                    <div class="absolute inset-0 bg-mono-700 dark:bg-mono-300 transform scale-y-0 group-hover:scale-y-100 transition-transform origin-bottom duration-300 z-0"></div>
+                </button>
+                <button onclick="FF_App.Theme.toggle()" class="w-10 h-10 flex items-center justify-center border border-mono-300 dark:border-mono-700 hover:bg-mono-black hover:text-mono-white dark:hover:bg-mono-white dark:hover:text-mono-black transition-all">
+                    <span class="text-[9px] font-bold">I/O</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- EVENT TABS (Scrollable) -->
+        <div class="border-t border-mono-200 dark:border-mono-800">
+            <div id="event-tabs-container" class="max-w-[100rem] mx-auto px-4 md:px-8 flex overflow-x-auto gap-8 hide-scroll items-center h-14 relative">
+                {% for event in client.events %}
+                    <button onclick="FF_App.Gallery.loadEvent('{{ event.event_id }}', '{{ event.folder_id }}', this, '{{ event.event_name }}')" 
+                            class="event-tab relative text-[10px] font-bold tracking-widest-xl uppercase whitespace-nowrap text-mono-500 hover:text-mono-black dark:hover:text-mono-white transition-colors h-full flex items-center group"
+                            data-event-id="{{ event.event_id }}">
+                        {{ event.event_name }}
+                        <span class="tab-count ml-2 bg-mono-200 dark:bg-mono-800 text-mono-black dark:text-mono-white px-1.5 py-0.5 rounded-sm hidden transition-all group-hover:bg-mono-300 dark:group-hover:bg-mono-700" data-count-for="{{ event.event_id }}">0</span>
+                        <div class="tab-indicator absolute bottom-0 left-0 w-full h-[2px] bg-mono-black dark:bg-mono-white transform scale-x-0 transition-transform duration-300 origin-left"></div>
+                    </button>
+                {% else %}
+                    <span class="text-[10px] font-mono tracking-widest uppercase text-mono-500">No collections available.</span>
+                {% endfor %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN VIEWS -->
+    <div id="view-container" class="pt-36">
+        
+        <!-- 1. GALLERY VIEW -->
+        <main id="gallery-view" class="max-w-[100rem] mx-auto px-4 md:px-8 py-8 transition-opacity duration-500">
+            <div id="gallery-grid" class="masonry-grid"></div>
+            
+            <div id="loading-sentinel" class="w-full flex flex-col items-center justify-center py-20 hidden">
+                <svg class="w-8 h-8 animate-spin text-mono-300 dark:text-mono-700" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                <p class="text-[10px] font-mono tracking-widest uppercase text-mono-500 mt-6 animate-pulse">Extracting Data...</p>
+            </div>
+        </main>
+
+        <!-- 2. REVIEW & SUBMIT VIEW -->
+        <main id="review-view" class="max-w-[100rem] mx-auto px-4 md:px-8 py-8 hidden transition-opacity duration-500">
+            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-end mb-16 border-b border-mono-200 dark:border-mono-800 pb-8 gap-8">
+                <div>
+                    <button onclick="FF_App.Review.close()" class="flex items-center gap-3 text-[10px] font-bold tracking-widest-xl uppercase text-mono-500 hover:text-mono-black dark:hover:text-mono-white transition-colors mb-6 group">
+                        <svg class="w-4 h-4 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16l-4-4m0 0l4-4m-4 4h18"></path></svg>
+                        Back to Archives
+                    </button>
+                    <h2 class="text-4xl md:text-6xl font-display font-bold tracking-tighter leading-none mb-4">Final Review.</h2>
+                    <p class="text-sm font-light text-mono-500">You have selected <span id="review-count-display" class="font-bold text-mono-black dark:text-mono-white">0</span> files across all collections.</p>
+                </div>
+                
+                <button onclick="FF_App.Review.submit()" id="final-submit-btn" class="group relative w-full lg:w-auto bg-mono-black dark:bg-mono-white text-mono-white dark:text-mono-black px-10 py-5 overflow-hidden transition-transform hover:scale-95">
+                    <span class="relative z-10 text-xs font-bold tracking-widest-xl uppercase flex items-center justify-center gap-3">
+                        Authorize Submission <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </span>
+                    <div class="absolute inset-0 bg-green-600 transform scale-y-0 group-hover:scale-y-100 transition-transform origin-bottom duration-300 z-0"></div>
+                </button>
+            </div>
+
+            <div id="review-content" class="space-y-20">
+                <!-- Injected via JS -->
+            </div>
+        </main>
+    </div>
+
+    <!-- LIGHTBOX OVERLAY -->
+    <div id="lightbox" class="fixed inset-0 bg-mono-white/95 dark:bg-mono-black/95 backdrop-blur-2xl z-[100] hidden flex-col items-center justify-center opacity-0 transition-opacity duration-500">
+        
+        <!-- Header -->
+        <div class="absolute top-0 inset-x-0 h-24 flex items-center justify-between px-6 md:px-12 z-20 bg-gradient-to-b from-mono-white dark:from-mono-black to-transparent">
+            <div class="flex flex-col">
+                <span id="lightbox-filename" class="text-sm font-display font-bold tracking-tight text-mono-black dark:text-mono-white"></span>
+                <span id="lightbox-folder-name" class="text-[9px] font-mono tracking-widest uppercase text-mono-500 mt-1"></span>
+            </div>
+            
+            <div class="flex items-center gap-6">
+                <span id="lightbox-counter" class="text-[10px] font-mono tracking-widest uppercase text-mono-500 hidden sm:block"></span>
+                
+                <button id="lightbox-select-btn" onclick="FF_App.Lightbox.toggleSelection()" class="group relative border border-mono-300 dark:border-mono-700 px-6 py-2 overflow-hidden transition-all">
+                    <span class="relative z-10 text-[10px] font-bold tracking-widest uppercase flex items-center gap-2" id="lightbox-select-text">Select</span>
+                </button>
+                
+                <button onclick="FF_App.Lightbox.close()" class="w-10 h-10 flex items-center justify-center hover:bg-mono-100 dark:hover:bg-mono-900 rounded-full transition-colors text-mono-500 hover:text-mono-black dark:hover:text-mono-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Image Area -->
+        <div class="w-full h-full flex items-center justify-center p-6 md:p-24 relative z-10" id="lightbox-touch-area">
+            <img id="lightbox-img" src="" alt="Preview" class="max-w-full max-h-full object-contain cursor-zoom-in transition-transform duration-500 shadow-2xl" onclick="FF_App.Lightbox.toggleZoom()">
+        </div>
+        
+        <!-- Navigation -->
+        <button onclick="FF_App.Lightbox.prev()" class="absolute left-4 md:left-12 top-1/2 -translate-y-1/2 w-12 h-12 flex items-center justify-center bg-mono-white/50 dark:bg-mono-black/50 hover:bg-mono-white dark:hover:bg-mono-black rounded-full backdrop-blur-md transition-all z-20 text-mono-black dark:text-mono-white border border-mono-200 dark:border-mono-800">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 19l-7-7 7-7"></path></svg>
+        </button>
+        <button onclick="FF_App.Lightbox.next()" class="absolute right-4 md:right-12 top-1/2 -translate-y-1/2 w-12 h-12 flex items-center justify-center bg-mono-white/50 dark:bg-mono-black/50 hover:bg-mono-white dark:hover:bg-mono-black rounded-full backdrop-blur-md transition-all z-20 text-mono-black dark:text-mono-white border border-mono-200 dark:border-mono-800">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5l7 7-7 7"></path></svg>
+        </button>
+    </div>
+
+    <!-- INJECT JINJA DATA -->
+    <script>window.FF_CLIENT_ID = "{{ special_id }}";</script>
+    <script src="{{ url_for('static', filename='js/gallery.js') }}"></script>
+</body>
+</html>

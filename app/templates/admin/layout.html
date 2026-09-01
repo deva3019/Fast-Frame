@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/logo1.png') }}">
+    <title>FF System | {{ title | default('Dashboard') }}</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'], display: ['Plus Jakarta Sans', 'sans-serif'] },
+                    colors: { mono: { 100: '#f4f4f5', 300: '#d4d4d8', 500: '#71717a', 700: '#27272a', 900: '#18181b', black: '#09090b', white: '#ffffff' } },
+                    letterSpacing: { 'widest-xl': '0.3em' },
+                    animation: { 'blob': 'blob 10s infinite', 'blob-reverse': 'blob-reverse 12s infinite' },
+                    keyframes: {
+                        blob: { '0%, 100%': { transform: 'translate(0px, 0px) scale(1)' }, '33%': { transform: 'translate(30px, -50px) scale(1.1)' }, '66%': { transform: 'translate(-20px, 20px) scale(0.9)' } },
+                        'blob-reverse': { '0%, 100%': { transform: 'translate(0px, 0px) scale(1)' }, '33%': { transform: 'translate(-30px, 50px) scale(1.1)' }, '66%': { transform: 'translate(20px, -20px) scale(0.9)' } }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
+        .film-grain { position: fixed; inset: 0; pointer-events: none; z-index: 9999; opacity: 0.04; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E"); }
+        .dark .film-grain { opacity: 0.06; mix-blend-mode: screen; }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 4px; }
+        .dark ::-webkit-scrollbar-thumb { background: #52525b; }
+        
+        .glass-panel { background: rgba(255, 255, 255, 0.4); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1px solid rgba(255, 255, 255, 0.2); }
+        .dark .glass-panel { background: rgba(24, 24, 27, 0.6); border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2); }
+        
+        /* Focus Bracket Navigation Interaction */
+        .nav-link { position: relative; transition: color 0.3s ease; }
+        .nav-link::before, .nav-link::after { content: ''; position: absolute; top: 50%; transform: translateY(-50%); opacity: 0; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); font-weight: 800; color: inherit; }
+        .nav-link::before { content: '['; left: 0px; }
+        .nav-link::after { content: ']'; right: 0px; }
+        .nav-link:hover::before, .nav-link.active-nav::before { opacity: 1; left: 12px; }
+        .nav-link:hover::after, .nav-link.active-nav::after { opacity: 1; right: 12px; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    </style>
+</head>
+<body class="bg-mono-100 text-mono-black dark:bg-mono-black dark:text-mono-white font-sans min-h-screen flex selection:bg-mono-black selection:text-mono-white dark:selection:bg-mono-white dark:selection:text-mono-black overflow-hidden relative">
+
+    <div class="film-grain"></div>
+    <div id="toast-container" class="fixed bottom-8 right-8 z-[200] flex flex-col gap-3 pointer-events-none"></div>
+
+    <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div class="absolute top-[-10%] left-[10%] w-[40vw] h-[40vw] rounded-full bg-purple-500/10 dark:bg-purple-600/10 blur-[100px] animate-blob mix-blend-multiply dark:mix-blend-lighten"></div>
+        <div class="absolute bottom-[-10%] right-[10%] w-[35vw] h-[35vw] rounded-full bg-cyan-500/10 dark:bg-cyan-600/10 blur-[120px] animate-blob-reverse mix-blend-multiply dark:mix-blend-lighten animation-delay-2000"></div>
+    </div>
+
+    <!-- SIDEBAR NAVIGATION -->
+    <aside id="main-sidebar" class="hidden md:flex flex-col w-64 border-r border-mono-300/50 dark:border-mono-800/50 glass-panel h-screen sticky top-0 z-40 transition-all duration-500 absolute md:relative">
+        <div class="p-8 border-b border-mono-300/50 dark:border-mono-800/50">
+            <a href="/admin" class="flex items-center gap-3 group">
+                <img src="{{ url_for('static', filename='img/logo.png') }}" alt="FF" class="h-5 dark:invert group-hover:opacity-50 transition-opacity">
+                <span class="font-display font-bold text-lg tracking-tight">FastFrame</span>
+            </a>
+            <p class="text-[9px] font-mono tracking-widest-xl uppercase text-mono-500 mt-2">{{ studio_name }}</p>
+        </div>
+
+        <nav class="flex-1 overflow-y-auto py-8 px-2 space-y-2">
+            <p class="px-6 text-[9px] font-bold tracking-widest-xl uppercase text-mono-500 mb-6">Core Operations</p>
+            
+            <!-- Fixed Contrast Nav Links with Focus Brackets -->
+            <a href="/admin/dashboard" class="nav-link flex items-center justify-center py-3 text-xs font-bold tracking-widest uppercase transition-colors {% if request.path == '/admin/dashboard' %}active-nav text-mono-black dark:text-mono-white{% else %}text-mono-500 hover:text-mono-black dark:hover:text-mono-white{% endif %}">Dashboard</a>
+            
+            <a href="/admin/clients" class="nav-link flex items-center justify-center py-3 text-xs font-bold tracking-widest uppercase transition-colors {% if request.path == '/admin/clients' %}active-nav text-mono-black dark:text-mono-white{% else %}text-mono-500 hover:text-mono-black dark:hover:text-mono-white{% endif %}">Clients</a>
+            
+            <a href="/admin/galleries" class="nav-link flex items-center justify-center py-3 text-xs font-bold tracking-widest uppercase transition-colors {% if request.path == '/admin/galleries' %}active-nav text-mono-black dark:text-mono-white{% else %}text-mono-500 hover:text-mono-black dark:hover:text-mono-white{% endif %}">Galleries</a>
+            
+            <a href="/settings" class="nav-link flex items-center justify-center py-3 text-xs font-bold tracking-widest uppercase transition-colors {% if request.path == '/settings' %}active-nav text-mono-black dark:text-mono-white{% else %}text-mono-500 hover:text-mono-black dark:hover:text-mono-white{% endif %}">Settings</a>
+        </nav>
+
+        <div class="p-6 border-t border-mono-300/50 dark:border-mono-800/50">
+            <button onclick="FF_Admin.Auth.logout()" class="w-full text-center flex justify-center items-center gap-3 py-3 text-xs font-bold tracking-widest uppercase text-red-600 hover:text-red-500 transition-colors">
+                Terminate
+            </button>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <div class="flex-1 flex flex-col h-screen overflow-hidden relative z-10">
+        <header class="md:hidden border-b border-mono-300/50 dark:border-mono-800/50 glass-panel p-4 flex justify-between items-center z-40">
+            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="FF" class="h-4 dark:invert">
+            <button id="mobile-menu-btn" class="w-8 h-8 flex flex-col justify-center items-end gap-1.5 focus:outline-none">
+                <span class="w-6 h-[1.5px] bg-current transition-all" id="line-1"></span>
+                <span class="w-4 h-[1.5px] bg-current transition-all" id="line-2"></span>
+            </button>
+        </header>
+
+        <header class="hidden md:flex h-20 border-b border-mono-300/50 dark:border-mono-800/50 px-10 items-center justify-between glass-panel z-30">
+            <h2 class="font-display font-bold text-2xl">{% block header_title %}Overview{% endblock %}</h2>
+            <div class="flex items-center gap-6">
+                <span class="text-[10px] font-mono tracking-widest uppercase text-green-600 flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 bg-green-600 rounded-full animate-pulse"></span> Network Active
+                </span>
+                <div class="w-px h-6 bg-mono-300 dark:bg-mono-800"></div>
+                <button onclick="FF_Admin.Theme.toggle()" class="w-8 h-8 rounded-full border border-mono-300 dark:border-mono-700 flex items-center justify-center hover:bg-mono-black hover:text-mono-white dark:hover:bg-mono-white dark:hover:text-mono-black transition-colors">
+                    <span class="text-[9px] font-bold">I/O</span>
+                </button>
+            </div>
+        </header>
+
+        <main class="flex-1 overflow-y-auto p-6 md:p-10 animate-fade-in relative z-20">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+</body>
+</html>

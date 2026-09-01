@@ -1,0 +1,83 @@
+{% extends "admin/layout.html" %}
+
+{% block header_title %}System Dashboard{% endblock %}
+
+{% block content %}
+<style>
+    /* Hardware Accelerated 3D Transformations */
+    .tilt-card { transform-style: preserve-3d; transform: perspective(1000px); will-change: transform; transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
+    .tilt-glare { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.1) 0%, transparent 60%); opacity: 0; transition: opacity 0.3s; mix-blend-mode: overlay; z-index: 10; }
+    .dark .tilt-glare { background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.05) 0%, transparent 60%); }
+    .tilt-card:hover .tilt-glare { opacity: 1; }
+    
+    /* Aperture Rotation Animation */
+    .aperture-icon { transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    .group:hover .aperture-icon { transform: rotate(90deg) scale(1.1); }
+</style>
+
+<div class="max-w-6xl mx-auto space-y-12 pb-20">
+    
+    <!-- 3D PARALLAX STATS GRID -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <div class="glass-panel rounded-2xl p-8 shadow-xl relative overflow-hidden tilt-card border-mono-300 dark:border-mono-800">
+            <div class="tilt-glare"></div>
+            <p class="text-[10px] font-bold tracking-widest-xl uppercase text-mono-500 mb-4 transform translate-z-10">Total Vaults</p>
+            <div id="skel-clients" class="h-12 w-24 bg-mono-300/50 dark:bg-mono-700/50 rounded-lg animate-pulse"></div>
+            <h3 class="font-display font-bold text-5xl hidden transform translate-z-20 text-mono-black dark:text-mono-white" id="stat-clients"></h3>
+        </div>
+        
+        <div class="glass-panel rounded-2xl p-8 shadow-xl relative overflow-hidden tilt-card border-mono-300 dark:border-mono-800">
+            <div class="tilt-glare"></div>
+            <p class="text-[10px] font-bold tracking-widest-xl uppercase text-mono-500 mb-4 transform translate-z-10">Active Mounts</p>
+            <div id="skel-galleries" class="h-12 w-24 bg-mono-300/50 dark:bg-mono-700/50 rounded-lg animate-pulse"></div>
+            <h3 class="font-display font-bold text-5xl hidden transform translate-z-20 text-mono-black dark:text-mono-white" id="stat-galleries"></h3>
+        </div>
+        
+        <div class="glass-panel rounded-2xl p-8 shadow-xl relative overflow-hidden tilt-card border-mono-300 dark:border-mono-800">
+            <div class="tilt-glare"></div>
+            <p class="text-[10px] font-bold tracking-widest-xl uppercase text-mono-500 mb-4 transform translate-z-10">Processed Assets</p>
+            <div id="skel-selections" class="h-12 w-24 bg-mono-300/50 dark:bg-mono-700/50 rounded-lg animate-pulse"></div>
+            <h3 class="font-display font-bold text-5xl hidden transform translate-z-20 text-mono-black dark:text-mono-white" id="stat-selections"></h3>
+        </div>
+    </div>
+
+    <!-- QUICK ACTIONS (High Contrast Aperture Icons) -->
+    <div>
+        <h4 class="text-[10px] font-bold tracking-widest uppercase text-mono-500 mb-6">Quick Operations</h4>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            <a href="/admin/clients" class="flex items-center justify-between p-6 glass-panel border-mono-300 dark:border-mono-800 rounded-xl hover:border-mono-black dark:hover:border-mono-white transition-all hover:-translate-y-1 shadow-lg group">
+                <div class="flex items-center gap-5">
+                    <div class="w-10 h-10 rounded-full border border-mono-300 dark:border-mono-700 bg-transparent flex items-center justify-center text-mono-black dark:text-mono-white">
+                        <!-- Aperture Graphic -->
+                        <svg class="w-5 h-5 aperture-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22ZM12 22V12M12 2V12M2 12H12M22 12H12M4.92893 4.92893L12 12M19.0711 19.0711L12 12M19.0711 4.92893L12 12M4.92893 19.0711L12 12"></path></svg>
+                    </div>
+                    <span class="text-xs font-bold tracking-widest uppercase text-mono-black dark:text-mono-white">New Client</span>
+                </div>
+                <span class="text-mono-black dark:text-mono-white opacity-50 group-hover:opacity-100 group-hover:translate-x-2 transition-all">&rarr;</span>
+            </a>
+            
+            <a href="/admin/galleries" class="flex items-center justify-between p-6 glass-panel border-mono-300 dark:border-mono-800 rounded-xl hover:border-mono-black dark:hover:border-mono-white transition-all hover:-translate-y-1 shadow-lg group">
+                <div class="flex items-center gap-5">
+                    <div class="w-10 h-10 rounded-full border border-mono-300 dark:border-mono-700 bg-transparent flex items-center justify-center text-mono-black dark:text-mono-white">
+                        <svg class="w-5 h-5 aperture-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22ZM12 22V12M12 2V12M2 12H12M22 12H12M4.92893 4.92893L12 12M19.0711 19.0711L12 12M19.0711 4.92893L12 12M4.92893 19.0711L12 12"></path></svg>
+                    </div>
+                    <span class="text-xs font-bold tracking-widest uppercase text-mono-black dark:text-mono-white">Mount Gallery</span>
+                </div>
+                <span class="text-mono-black dark:text-mono-white opacity-50 group-hover:opacity-100 group-hover:translate-x-2 transition-all">&rarr;</span>
+            </a>
+            
+            <a href="/settings" class="flex items-center justify-between p-6 glass-panel border-mono-300 dark:border-mono-800 rounded-xl hover:border-mono-black dark:hover:border-mono-white transition-all hover:-translate-y-1 shadow-lg group">
+                <div class="flex items-center gap-5">
+                    <div class="w-10 h-10 rounded-full border border-mono-300 dark:border-mono-700 bg-transparent flex items-center justify-center text-mono-black dark:text-mono-white">
+                        <svg class="w-5 h-5 aperture-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22ZM12 22V12M12 2V12M2 12H12M22 12H12M4.92893 4.92893L12 12M19.0711 19.0711L12 12M19.0711 4.92893L12 12M4.92893 19.0711L12 12"></path></svg>
+                    </div>
+                    <span class="text-xs font-bold tracking-widest uppercase text-mono-black dark:text-mono-white">System Keys</span>
+                </div>
+                <span class="text-mono-black dark:text-mono-white opacity-50 group-hover:opacity-100 group-hover:translate-x-2 transition-all">&rarr;</span>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

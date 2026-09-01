@@ -1,0 +1,87 @@
+# ⚡ FastFrame
+**Uncompromising Visual Delivery for Professional Studios.**
+
+[![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
+[![Flask](https://img.shields.io/badge/Flask-Framework-black?logo=flask)](https://flask.palletsprojects.com/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Aggregations-green?logo=mongodb)](https://www.mongodb.com/)
+[![TailwindCSS](https://img.shields.io/badge/Tailwind-CSS-38B2AC?logo=tailwind-css)](https://tailwindcss.com/)
+
+FastFrame is a high-performance, edge-rendered client gallery platform designed to bridge the gap between a photographer's lens and the client's legacy. It eliminates loading bottlenecks, securely integrates directly with Google Drive via Service Accounts, and delivers a zero-latency experience engineered specifically to handle thousands of high-resolution image assets without destroying bandwidth.
+
+---
+
+## ✨ System Architecture & Features
+
+### 🚀 Zero-Latency Rendering ("The Lazy Shell")
+Heavy database scans have been entirely eliminated. The UI renders instantly using skeleton states, while data is asynchronously hydrated via lightning-fast **MongoDB Aggregation Pipelines**. Server-side sorting delays (COLLSCAN) are bypassed using natively built descending indices, dropping payload delivery times from 10 seconds to under 50 milliseconds.
+
+### 🎥 Cinematic UI/UX (Dark Aurora Aesthetic)
+*   **Hardware Accelerated 3D Parallax:** Glassmorphic data cards tilt and react to cursor positioning using pure math via CSS `transform3d`, offloading rendering to the GPU for butter-smooth 60fps animations.
+*   **Aperture Focus Bracket Navigation:** Custom CSS micro-interactions mimic the behavior of a camera lens focusing, providing visceral, tactile feedback.
+*   **Lenis Smooth Scrolling:** Buttery, inertia-based scrolling overrides native browser chunkiness for a premium, agency-level feel.
+
+### 🔐 Secure Vault Drive Integration
+Instead of manual zip downloads, FastFrame creates a direct pipeline to the studio's Google Workspace. 
+*   Uses **Google Cloud Service Accounts** to bypass standard OAuth flows.
+*   Studios securely upload `credentials.json` via a drag-and-drop frosted glass dropzone.
+*   Keys are **encrypted at rest** using Fernet cryptography.
+*   "Live Optics" preview allows the studio to simulate the exact client gallery environment within an iframe before deployment.
+
+### 🧠 Revealing Module Pattern (Vanilla JS)
+The frontend JavaScript is architected using the Revealing Module Pattern. All logic, state, and DOM manipulation are safely encapsulated within distinct domain modules (`UI`, `Dashboard`, `Clients`, `Galleries`, `Settings`) to prevent global namespace pollution and ensure high maintainability.
+
+---
+
+## 🛠️ Technical Stack
+*   **Backend:** Python 3, Flask, PyMongo, Cryptography (Fernet)
+*   **Database:** MongoDB Atlas (Indexed, Connection Pooled)
+*   **Storage API:** Google Drive v3 API (Service Account Authentication)
+*   **Frontend UI:** HTML5, Vanilla JavaScript, Tailwind CSS (via CDN for edge rendering)
+*   **Animation Engine:** Native CSS Keyframes, Intersection Observers, Lenis.js
+
+---
+
+## ⚙️ Installation & Setup
+
+1. **Clone the Repository**
+   ```bash
+   git clone https://github.com/your-username/fastframe.git
+   cd fastframe
+   ```
+
+2. **Establish Virtual Environment**
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+   ```
+
+3. **Install Dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Environment Variables (.env)**
+   ```ini
+   FLASK_ENV=development
+   MONGO_URI=mongodb+srv://<user>:<password>@cluster.mongodb.net/
+   MONGO_DB_NAME=fastframe_core
+   SECRET_KEY=your_secure_flask_key
+   FERNET_KEY=your_fernet_encryption_key
+   ```
+
+5. **Initialize System**
+   ```bash
+   python app.py
+   ```
+
+---
+
+## 📸 Usage Workflow
+1. Navigate to `/auth/register` to establish the initial Studio Identity.
+2. Inside the Dashboard, click the **Settings** tab. Drag and drop your Google Cloud `credentials.json` file to establish the secure connection.
+3. Under **Clients**, generate a secure Vault (e.g., `WEDDING2026`).
+4. Under **Galleries**, map a Google Drive Folder ID to the client.
+5. The client accesses their gallery using their assigned ID at the root domain.
+
+---
+*Architected for scale. Built for the modern web.*

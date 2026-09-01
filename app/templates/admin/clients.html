@@ -1,0 +1,76 @@
+{% extends "admin/layout.html" %}
+
+{% block header_title %}Client Registry{% endblock %}
+
+{% block content %}
+<div class="max-w-[90rem] mx-auto">
+    
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+        
+        <!-- LEFT COLUMN: Registration Form -->
+        <div class="lg:col-span-4">
+            <div class="glass-panel rounded-3xl p-8 sticky top-32 shadow-xl">
+                <h3 class="font-display font-bold text-3xl mb-2">Initialize Vault</h3>
+                <p class="font-sans text-[10px] text-mono-500 uppercase tracking-widest mb-8">Generate a new secure client environment.</p>
+
+                <form id="add-client-form" class="space-y-6">
+                    <div class="relative group">
+                        <label class="text-[9px] font-bold tracking-widest-xl uppercase text-mono-500 mb-2 block transition-colors group-focus-within:text-mono-black dark:group-focus-within:text-mono-white">Authorization ID</label>
+                        <input type="text" id="client-id" required placeholder="E.G. WEDDING2026" class="w-full bg-transparent font-mono text-base py-3 border-b border-mono-300 dark:border-mono-700 focus:border-mono-black dark:focus:border-mono-white outline-none transition-colors uppercase tracking-widest placeholder:text-mono-300 dark:placeholder:text-mono-700">
+                    </div>
+                    
+                    <div class="relative group">
+                        <label class="text-[9px] font-bold tracking-widest-xl uppercase text-mono-500 mb-2 block transition-colors group-focus-within:text-mono-black dark:group-focus-within:text-mono-white">Client Name</label>
+                        <input type="text" id="client-name" required placeholder="John & Jane Doe" class="w-full bg-transparent font-sans text-base py-3 border-b border-mono-300 dark:border-mono-700 focus:border-mono-black dark:focus:border-mono-white outline-none transition-colors placeholder:text-mono-300 dark:placeholder:text-mono-700">
+                    </div>
+
+                    <div class="relative group">
+                        <label class="text-[9px] font-bold tracking-widest-xl uppercase text-mono-500 mb-2 block transition-colors group-focus-within:text-mono-black dark:group-focus-within:text-mono-white">Phone Contact</label>
+                        <input type="tel" id="client-phone" placeholder="+91 98765 43210" class="w-full bg-transparent font-mono text-base py-3 border-b border-mono-300 dark:border-mono-700 focus:border-mono-black dark:focus:border-mono-white outline-none transition-colors placeholder:text-mono-300 dark:placeholder:text-mono-700">
+                    </div>
+
+                    <div class="relative group">
+                        <label class="text-[9px] font-bold tracking-widest-xl uppercase text-mono-500 mb-2 block transition-colors group-focus-within:text-mono-black dark:group-focus-within:text-mono-white">Email (Optional)</label>
+                        <input type="email" id="client-email" placeholder="client@domain.com" class="w-full bg-transparent font-sans text-base py-3 border-b border-mono-300 dark:border-mono-700 focus:border-mono-black dark:focus:border-mono-white outline-none transition-colors uppercase tracking-wider placeholder:text-mono-300 dark:placeholder:text-mono-700">
+                    </div>
+
+                    <button type="submit" class="w-full bg-mono-black text-mono-white dark:bg-mono-white dark:text-mono-black py-4 rounded-full text-[10px] font-bold tracking-widest uppercase hover:scale-[0.98] transition-transform shadow-lg mt-4">
+                        Generate Identity
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- RIGHT COLUMN: Data Grid & Search -->
+        <div class="lg:col-span-8 flex flex-col h-full">
+            
+            <!-- Controls: Search & Filter -->
+            <div class="flex flex-col sm:flex-row gap-4 mb-8">
+                <div class="relative flex-1 group">
+                    <svg class="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-mono-400 dark:text-mono-500 transition-colors group-focus-within:text-mono-black dark:group-focus-within:text-mono-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    <input type="text" id="search-clients" placeholder="Search by name, ID, or phone..." class="w-full pl-12 pr-4 py-4 rounded-2xl glass-panel font-sans text-sm focus:outline-none focus:border-mono-500 transition-colors placeholder:text-mono-400 dark:placeholder:text-mono-600">
+                </div>
+                <select id="filter-status" class="px-6 py-4 rounded-2xl glass-panel font-sans text-sm font-bold uppercase tracking-widest focus:outline-none appearance-none cursor-pointer text-mono-700 dark:text-mono-300">
+                    <option value="ALL">All Statuses</option>
+                    <option value="PENDING">Pending</option>
+                    <option value="COMPLETED">Completed</option>
+                </select>
+            </div>
+
+            <!-- List Container -->
+            <div class="flex-1 relative">
+                <!-- Skeleton Loaders -->
+                <div id="clients-skeleton" class="space-y-4 w-full">
+                    <div class="h-28 w-full glass-panel rounded-2xl bg-mono-200/20 dark:bg-mono-800/20 animate-pulse"></div>
+                    <div class="h-28 w-full glass-panel rounded-2xl bg-mono-200/20 dark:bg-mono-800/20 animate-pulse delay-75"></div>
+                    <div class="h-28 w-full glass-panel rounded-2xl bg-mono-200/20 dark:bg-mono-800/20 animate-pulse delay-150"></div>
+                </div>
+
+                <!-- Dynamic Data Injection -->
+                <div id="clients-list" class="space-y-4 hidden flex-col pb-12"></div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

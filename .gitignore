@@ -1,0 +1,54 @@
+# =========================
+# 🔐 SECURITY & SECRETS
+# =========================
+.env
+.env.*
+credentials.json
+client_secret.json
+token.json
+*.pem
+*.key
+
+# =========================
+# 🐍 PYTHON & FLASK
+# =========================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+instance/
+.webassets-cache
+
+# =========================
+# 📦 VIRTUAL ENVIRONMENTS
+# =========================
+venv/
+env/
+.venv/
+env.bak/
+venv.bak/
+
+# =========================
+# 📝 LOGS & DATABASES
+# =========================
+*.log
+*.sqlite3
+db.sqlite3
+
+# =========================
+# 💻 OS & EDITOR FILES
+# =========================
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# =========================
+# 🌐 FRONTEND (If scaling later)
+# =========================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

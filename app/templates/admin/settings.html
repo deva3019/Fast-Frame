@@ -1,0 +1,175 @@
+{% extends "admin/layout.html" %}
+
+{% block header_title %}System Settings{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto space-y-8 pb-20">
+
+    <!-- 1. STUDIO ID CARD (Profile) -->
+    <div class="glass-panel rounded-3xl p-8 relative overflow-hidden group shadow-xl border-mono-300 dark:border-mono-800">
+        <div class="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 opacity-50 pointer-events-none"></div>
+        
+        <div class="flex justify-between items-start mb-6 relative z-10">
+            <h3 class="font-display font-bold text-2xl text-mono-black dark:text-mono-white">Studio Identity</h3>
+            <button id="profile-edit-btn" onclick="FF_Admin.Settings.toggleEditMode()" class="bg-mono-200 dark:bg-mono-800 text-mono-600 dark:text-mono-300 hover:bg-mono-black hover:text-mono-white dark:hover:bg-mono-white dark:hover:text-mono-black px-4 py-2 rounded-full text-[9px] font-bold tracking-widest uppercase transition-colors shadow-sm">
+                Edit Identity
+            </button>
+        </div>
+
+        <form id="profile-form" class="relative z-10">
+            <div class="flex flex-col md:flex-row items-center md:items-start gap-8">
+                <!-- Avatar -->
+                <div class="w-32 h-32 rounded-full bg-mono-200 dark:bg-mono-800 border-4 border-mono-white dark:border-mono-black shadow-lg overflow-hidden shrink-0 flex items-center justify-center">
+                    <span class="font-display font-bold text-4xl text-mono-500" id="avatar-initials">FF</span>
+                </div>
+                
+                <!-- Info Display / Edit Inputs -->
+                <div class="flex-1 w-full space-y-4">
+                    <div class="profile-field">
+                        <label class="text-[9px] font-bold tracking-widest-xl uppercase text-mono-500 block mb-1">Studio Name</label>
+                        <h4 id="display-name" class="font-display font-bold text-3xl">Loading...</h4>
+                        <input type="text" id="profile-name" class="hidden w-full bg-mono-100 dark:bg-mono-900 font-sans text-xl py-2 px-4 rounded-xl border border-mono-300 dark:border-mono-700 focus:outline-none focus:border-mono-500 transition-colors">
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="profile-field">
+                            <label class="text-[9px] font-bold tracking-widest-xl uppercase text-mono-500 block mb-1">Contact Email</label>
+                            <p id="display-email" class="font-mono text-sm text-mono-600 dark:text-mono-300">...</p>
+                            <input type="email" id="profile-email" class="hidden w-full bg-mono-100 dark:bg-mono-900 font-mono text-sm py-2 px-4 rounded-xl border border-mono-300 dark:border-mono-700 focus:outline-none focus:border-mono-500 transition-colors">
+                        </div>
+                        <div class="profile-field">
+                            <label class="text-[9px] font-bold tracking-widest-xl uppercase text-mono-500 block mb-1">Brand Tagline</label>
+                            <p id="display-tagline" class="font-sans text-sm text-mono-600 dark:text-mono-300">...</p>
+                            <input type="text" id="profile-tagline" class="hidden w-full bg-mono-100 dark:bg-mono-900 font-sans text-sm py-2 px-4 rounded-xl border border-mono-300 dark:border-mono-700 focus:outline-none focus:border-mono-500 transition-colors">
+                        </div>
+                    </div>
+
+                    <button type="submit" id="profile-save-btn" class="hidden mt-4 bg-green-500 text-white px-6 py-3 rounded-full text-[10px] font-bold tracking-widest uppercase hover:scale-95 transition-transform shadow-lg">
+                        Save Changes
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- 2. SECURE VAULT (Credentials & Email Sharing) -->
+    <div class="glass-panel rounded-3xl p-8 shadow-xl border-mono-300 dark:border-mono-800">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+            <div>
+                <h3 class="font-display font-bold text-2xl mb-1">Drive Configuration</h3>
+                <p class="font-sans text-[10px] text-mono-500 uppercase tracking-widest">Master Cloud Authentication Keys.</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="FF_Admin.Settings.toggleGuideModal()" class="flex items-center gap-2 bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400 px-4 py-2 rounded-full text-[9px] font-bold tracking-widest uppercase hover:bg-blue-500 hover:text-white transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    How to Setup
+                </button>
+                <button id="view-keys-btn" onclick="FF_Admin.Settings.previewCredentials()" class="hidden flex items-center gap-2 bg-mono-200 dark:bg-mono-800 px-4 py-2 rounded-full text-[9px] font-bold tracking-widest uppercase hover:bg-mono-black hover:text-white dark:hover:bg-mono-white dark:hover:text-black transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                    View Config
+                </button>
+            </div>
+        </div>
+
+        <!-- The Highly Important Copyable Service Account Email -->
+        <div id="service-account-banner" class="hidden mb-8 p-6 rounded-2xl bg-gradient-to-r from-mono-100 to-mono-200 dark:from-mono-900 dark:to-mono-800 border border-mono-300 dark:border-mono-700 relative overflow-hidden">
+            <p class="text-[10px] font-bold tracking-widest uppercase text-mono-500 mb-2">System Service Email (Requires 'Editor' Access to Drive Folders)</p>
+            <div class="flex items-center justify-between gap-4 bg-mono-white dark:bg-mono-black p-4 rounded-xl border border-mono-300 dark:border-mono-700 shadow-inner">
+                <code id="service-email-text" class="font-mono text-sm text-mono-800 dark:text-mono-200 truncate select-all">...</code>
+                <button onclick="FF_Admin.Settings.copyEmail()" class="shrink-0 bg-mono-black text-mono-white dark:bg-mono-white dark:text-mono-black px-4 py-2 rounded-lg text-[9px] font-bold tracking-widest uppercase hover:scale-95 transition-transform shadow-md">
+                    Copy Email
+                </button>
+            </div>
+        </div>
+
+        <!-- Drag and Drop Vault -->
+        <div id="dropzone" class="w-full border-2 border-dashed border-mono-300 dark:border-mono-700 rounded-3xl p-12 flex flex-col items-center justify-center text-center transition-all duration-300 bg-mono-100/30 dark:bg-mono-900/30 hover:bg-mono-100 dark:hover:bg-mono-800 cursor-pointer">
+            <input type="file" id="file-upload" accept=".json" class="hidden">
+            
+            <div id="dropzone-icon" class="w-16 h-16 rounded-full bg-mono-200 dark:bg-mono-800 flex items-center justify-center text-mono-500 mb-4 transition-transform duration-300">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+            </div>
+            
+            <h4 class="font-display font-bold text-xl mb-2" id="dropzone-title">Upload credentials.json</h4>
+            <p class="font-sans text-xs text-mono-500 max-w-sm" id="dropzone-desc">Drag and drop your Google Cloud Service Account JSON file here, or click to browse.</p>
+        </div>
+    </div>
+</div>
+
+<!-- CREDENTIALS PREVIEW MODAL (Redacted) -->
+<div id="preview-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-mono-white/80 dark:bg-mono-black/80 backdrop-blur-md" onclick="FF_Admin.Settings.togglePreviewModal()"></div>
+    <div class="glass-panel rounded-3xl w-full max-w-2xl p-8 relative z-10 shadow-2xl transform scale-95 opacity-0 transition-all duration-300" id="preview-modal-content">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="font-display font-bold text-xl flex items-center gap-3">
+                <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                Active Configuration
+            </h3>
+            <button onclick="FF_Admin.Settings.togglePreviewModal()" class="text-mono-500 hover:text-mono-black dark:hover:text-mono-white">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+        <div class="bg-mono-black rounded-xl p-4 overflow-x-auto border border-mono-800">
+            <pre id="json-preview-text" class="font-mono text-xs text-green-400"></pre>
+        </div>
+        <p class="text-[9px] font-bold tracking-widest uppercase text-mono-500 mt-4 text-center">Private key is redacted for security. This file is encrypted on the server.</p>
+    </div>
+</div>
+
+<!-- INTERACTIVE GUIDE SLIDER MODAL -->
+<div id="guide-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-mono-white/90 dark:bg-mono-black/90 backdrop-blur-xl" onclick="FF_Admin.Settings.toggleGuideModal()"></div>
+    <div class="glass-panel rounded-3xl w-full max-w-3xl p-10 md:p-14 relative z-10 shadow-2xl transform scale-95 opacity-0 transition-all duration-300" id="guide-modal-content">
+        <button onclick="FF_Admin.Settings.toggleGuideModal()" class="absolute top-6 right-6 text-mono-500 hover:text-mono-black dark:hover:text-mono-white">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+
+        <div class="mb-8">
+            <span class="inline-block px-3 py-1 rounded-full bg-blue-500/10 text-blue-500 text-[9px] font-bold tracking-widest uppercase mb-4">Setup Guide</span>
+            <h3 class="font-display font-bold text-3xl">Google Cloud Integration</h3>
+        </div>
+
+        <!-- Slider Track -->
+        <div class="relative overflow-hidden w-full h-[220px]">
+            <div id="guide-slider" class="flex w-[300%] transition-transform duration-500 ease-in-out h-full">
+                
+                <!-- Step 1 -->
+                <div class="w-1/3 shrink-0 px-2 flex flex-col justify-center">
+                    <h4 class="font-bold text-xl mb-2 text-mono-black dark:text-mono-white">1. Enable Drive API</h4>
+                    <p class="text-sm text-mono-500 leading-relaxed mb-4">Log in to the <a href="https://console.cloud.google.com" target="_blank" class="text-blue-500 underline">Google Cloud Console</a>. Create a new Project. Use the top search bar to find <strong>"Google Drive API"</strong> and click the blue <strong>Enable</strong> button.</p>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="w-1/3 shrink-0 px-2 flex flex-col justify-center">
+                    <h4 class="font-bold text-xl mb-2 text-mono-black dark:text-mono-white">2. Create Service Account</h4>
+                    <p class="text-sm text-mono-500 leading-relaxed mb-4">Navigate to <strong>IAM & Admin > Service Accounts</strong>. Click "Create Service Account" at the top. Name it <em>FastFrame Drive Sync</em> and click Done. This acts as a robotic assistant that manages your files.</p>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="w-1/3 shrink-0 px-2 flex flex-col justify-center">
+                    <h4 class="font-bold text-xl mb-2 text-mono-black dark:text-mono-white">3. Generate JSON & Share</h4>
+                    <p class="text-sm text-mono-500 leading-relaxed mb-4">Click the three dots next to your new account. Go to <strong>Manage Keys > Add Key > Create New Key > JSON</strong>. Upload that downloaded file to FastFrame. <br><br><span class="text-red-500 font-bold">CRITICAL:</span> You must share your Google Drive photo folders with the generated Service Account Email as an "Editor".</p>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="flex items-center justify-between mt-8 border-t border-mono-300 dark:border-mono-700 pt-6">
+            <div class="flex gap-2" id="guide-dots">
+                <span class="w-2 h-2 rounded-full bg-mono-black dark:bg-mono-white transition-opacity"></span>
+                <span class="w-2 h-2 rounded-full bg-mono-400 dark:bg-mono-600 transition-opacity"></span>
+                <span class="w-2 h-2 rounded-full bg-mono-400 dark:bg-mono-600 transition-opacity"></span>
+            </div>
+            <div class="flex gap-3">
+                <button id="guide-prev" onclick="FF_Admin.Settings.guideSlide(-1)" class="w-10 h-10 rounded-full border border-mono-300 dark:border-mono-700 flex items-center justify-center opacity-50 pointer-events-none transition-all">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                </button>
+                <button id="guide-next" onclick="FF_Admin.Settings.guideSlide(1)" class="w-10 h-10 rounded-full bg-mono-black text-mono-white dark:bg-mono-white dark:text-mono-black flex items-center justify-center hover:scale-95 transition-all">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
