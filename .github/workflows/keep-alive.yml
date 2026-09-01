@@ -1,0 +1,28 @@
+name: FastFrame Stealth Keep-Alive
+
+on:
+  schedule:
+    # Triggers precisely every 14 minutes
+    - cron: '*/14 * * * *'
+  workflow_dispatch: # Allows you to manually trigger it from the GitHub Actions tab
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Execute Stealth Ping
+        run: |
+          # We use a standard browser User-Agent to bypass bot-detection algorithms.
+          # -s hides the curl output, -o /dev/null dumps the HTML payload.
+          # We print the HTTP code (e.g., 200) to the GitHub logs to verify it worked.
+          
+          echo "Pinging FastFrame Edge Node..."
+          STATUS_CODE=$(curl -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36" -s -o /dev/null -w "%{http_code}" ${{ secrets.RENDER_URL }})
+          
+          echo "Server responded with status: $STATUS_CODE"
+          
+          if [ "$STATUS_CODE" -eq 200 ]; then
+            echo "Instance successfully warmed."
+          else
+            echo "Warning: Non-200 response received."
+          fi
